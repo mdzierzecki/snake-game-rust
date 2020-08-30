@@ -10,9 +10,26 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 use graphics::*;
 
+
+
 pub struct App {
     gl: GlGraphics, // OpenGL drawing backend.
     rotation: f64,  // Rotation for the square.
+    snake: Snake,
+}
+
+struct Snake {
+    pos_x: i32,
+    pos_y: i32
+}
+
+impl Snake {
+    fn render(&self, gl: &mut GlGraphics, args: &RenderArgs) {
+        const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+
+        let square = rectangle::square(self.pos_x as f64,
+        self.pos_y as f64, 20_f64);
+    }
 }
 
 impl App {
@@ -21,7 +38,7 @@ impl App {
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
         const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
-        let square = rectangle::square(0.0, 0.0, 50.0);
+        let square = rectangle::square(0.0, 0.0, 140.0);
         let rotation = self.rotation;
         let (x, y) = (args.window_size[0] / 2.0, args.window_size[1] / 2.0);
 
@@ -42,7 +59,7 @@ impl App {
 
     fn update(&mut self, args: &UpdateArgs) {
         // Rotate 2 radians per second.
-        self.rotation += 2.0 * args.dt;
+        self.rotation += 30.0 * args.dt;
     }
 }
 
@@ -51,16 +68,23 @@ fn main() {
     let opengl = OpenGL::V3_2;
 
     // Create an Glutin window.
-    let mut window: Window = WindowSettings::new("spinning-square", [200, 200])
+    let mut window: Window = WindowSettings::new("spinning-square", [800, 800])
         .graphics_api(opengl)
         .exit_on_esc(true)
         .build()
         .unwrap();
 
+    let snake = Snake{
+        pos_x: 2,
+        pos_y: 1,
+    };
+
+
     // Create a new game and run it.
     let mut app = App {
         gl: GlGraphics::new(opengl),
         rotation: 0.0,
+        snake: snake,
     };
 
     let mut events = Events::new(EventSettings::new());
