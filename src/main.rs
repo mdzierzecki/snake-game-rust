@@ -56,7 +56,7 @@ impl Snake {
         let square = rectangle::square(self.pos_x as f64,
         self.pos_y as f64, 20_f64);
 
-        let (x, y) = (args.window_size[0] / 2.0, args.window_size[1] / 2.0);
+        let (x, y) = (self.pos_x as f64, self.pos_y as f64);
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
@@ -73,7 +73,7 @@ impl Snake {
 
     fn update(&mut self, args: &UpdateArgs) {
         // Rotate 2 radians per second.
-        self.rotation += 30.0 * args.dt;
+        self.pos_y += 1;
     }
 }
 
@@ -90,8 +90,8 @@ fn main() {
         .unwrap();
 
     let mut snake = Snake{
-        pos_x: 2,
-        pos_y: 1,
+        pos_x: 400,
+        pos_y: 100,
         gl: GlGraphics::new(opengl),
         rotation: 0.0
     };
