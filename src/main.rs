@@ -9,6 +9,14 @@ use piston::event_loop::{EventSettings, Events};
 use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 use graphics::*;
+use crate::Direction::{Right, Left};
+use piston::{ButtonEvent, ButtonState, Button, Key};
+use piston::input::keyboard::Key::R;
+
+#[derive(Clone, PartialEq)]
+enum Direction {
+    Right, Left, Up, Down
+}
 
 struct Game {
     gl: GlGraphics,
@@ -40,12 +48,11 @@ impl Game {
     }
 }
 
-
 struct Snake {
     pos_x: i32,
     pos_y: i32,
     gl: GlGraphics,
-    rotation: f64,
+    dir: Direction
 }
 
 impl Snake {
@@ -71,9 +78,30 @@ impl Snake {
         });
     }
 
-    fn update(&mut self, args: &UpdateArgs) {
-        // Rotate 2 radians per second.
-        self.pos_y += 1;
+    fn update(&mut self) {
+
+        match self.dir {
+            Direction::Right => self.pos_x += 1,
+            Direction::Left => self.pos_x += 1,
+            Direction::Up => self.pos_y -= 1,
+            Direction::Down => self.pos_y += 1,
+        }
+    }
+
+    fn pressed(&mut self, btn: &Button) {
+        let last_direction = self.dir.clone();
+
+        self.dir = match btn {
+            &Button::Keyboard(Key::Up)
+                if last_direction != Direction::Down => Direction::Up,
+            &Button::Keyboard(Key::Down)
+                if last_direction != Direction::Up => Direction::Down,
+            &Button::Keyboard(Key::Left)
+                if last_direction != Direction::Right => Direction::Left,
+            &Button::Keyboard(Key::Right)
+                if last_direction != Direction::Left => Direction::Right,
+            _ => last_direction
+        }
     }
 }
 
@@ -90,10 +118,10 @@ fn main() {
         .unwrap();
 
     let mut snake = Snake{
-        pos_x: 400,
-        pos_y: 100,
+        pos_x: 200,
+        pos_y: 200,
         gl: GlGraphics::new(opengl),
-        rotation: 0.0
+        dir: Direction::Up
     };
 
     let mut game = Game {
@@ -109,7 +137,13 @@ fn main() {
 
         }
         if let Some(args) = e.update_args() {
-            snake.update(&args);
+            snake.update();
+        }
+
+        if let Some(k) = e.button_args() {
+            if k.state == ButtonState::Press {
+                snake.pressed(&k.button)
+            }
         }
     }
 }
