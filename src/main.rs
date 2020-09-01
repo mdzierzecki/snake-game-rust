@@ -10,6 +10,36 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::window::WindowSettings;
 use graphics::*;
 
+struct Game {
+    gl: GlGraphics,
+}
+
+impl Game {
+    fn render(&mut self, args: &RenderArgs) {
+
+        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+
+
+        let (x, y) = (args.window_size[0] / 2.0, args.window_size[1] / 2.0);
+
+        self.gl.draw(args.viewport(), |c, gl| {
+            // Clear the screen.
+            clear(GREEN, gl);
+
+            let transform = c
+                .transform
+                .trans(x, y)
+                .trans(-25.0, -25.0);
+
+            // Draw a box rotating around the middle of the screen.
+        });
+    }
+
+    fn update(&mut self, args: &UpdateArgs) {
+        // Rotate 2 radians per second.
+    }
+}
+
 
 struct Snake {
     pos_x: i32,
@@ -22,7 +52,6 @@ impl Snake {
     fn render(&mut self, args: &RenderArgs) {
 
         const RED: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-        const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
         let square = rectangle::square(self.pos_x as f64,
         self.pos_y as f64, 20_f64);
@@ -31,7 +60,6 @@ impl Snake {
 
         self.gl.draw(args.viewport(), |c, gl| {
             // Clear the screen.
-            clear(GREEN, gl);
 
             let transform = c
                 .transform
@@ -68,11 +96,17 @@ fn main() {
         rotation: 0.0
     };
 
+    let mut game = Game {
+        gl: GlGraphics::new(opengl)
+    };
+
     let mut events = Events::new(EventSettings::new());
 
     while let Some(e) = events.next(&mut window) {
         if let Some(args) = e.render_args() {
+            game.render(&args);
             snake.render(&args);
+
         }
         if let Some(args) = e.update_args() {
             snake.update(&args);
